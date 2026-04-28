@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USPTO Patent & Trademark Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.10);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #1a1916;
+    --text-2: #5a5954;
+    --text-3: #9a9890;
+    --accent: #1a1916;
+    --accent-fg: #ffffff;
+    --blue: #1a4fcc;
+    --blue-bg: #eef2fc;
+    --blue-text: #1a4fcc;
+    --green: #0d5c3a;
+    --green-bg: #e8f5ee;
+    --green-text: #0d5c3a;
+    --amber: #8a4e00;
+    --amber-bg: #fff3e0;
+    --amber-text: #8a4e00;
+    --red: #9b1c1c;
+    --red-bg: #fef2f2;
+    --red-text: #9b1c1c;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 1px rgba(0,0,0,0.04);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  [data-theme="dark"] {
+    --bg: #111110;
+    --surface: #1c1c1a;
+    --surface2: #242422;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #e8e7e2;
+    --text-2: #9a9890;
+    --text-3: #5a5954;
+    --accent: #e8e7e2;
+    --accent-fg: #111110;
+    --blue: #6b9eff;
+    --blue-bg: #1a2a4a;
+    --blue-text: #8fb8ff;
+    --green: #4ade80;
+    --green-bg: #0a2a1a;
+    --green-text: #6ee7a0;
+    --amber: #fbbf24;
+    --amber-bg: #2a1a00;
+    --amber-text: #fcd34d;
+    --red: #f87171;
+    --red-bg: #2a0a0a;
+    --red-text: #fca5a5;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  /* NAV */
+  nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .brand-icon {
+    width: 28px; height: 28px;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .nav-link {
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-2);
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    font-family: var(--font-body);
+    font-weight: 400;
+  }
+  .nav-link:hover { background: var(--surface2); color: var(--text); }
+  .nav-link.active { background: var(--surface2); color: var(--text); font-weight: 500; }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .watchlist-badge {
+    position: relative;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-2);
+    font-size: 13px;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .watchlist-badge:hover { border-color: var(--border-strong); color: var(--text); }
+  .badge-count {
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 1px 5px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .theme-toggle {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    cursor: pointer;
+    color: var(--text-2);
+    font-size: 15px;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .theme-toggle:hover { border-color: var(--border-strong); color: var(--text); }
+
+  /* MAIN */
+  main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* HERO SEARCH */
+  .hero {
+    text-align: center;
+    padding: 48px 0 40px;
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 16px;
+    font-family: var(--font-mono);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .hero-sub {
+    color: var(--text-2);
+    font-size: 15px;
+    margin-bottom: 32px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* SEARCH BAR */
+  .search-container {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    padding: 6px 6px 6px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 680px;
+    margin: 0 auto;
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s;
+  }
+  .search-container:focus-within { border-color: var(--text); }
+  .search-input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 15px;
+    color: var(--text);
+    font-family: var(--font-body);
+    outline: none;
+    padding: 6px 0;
+  }
+  .search-input::placeholder { color: var(--text-3); }
+  .search-type-toggle {
+    display: flex;
+    gap: 2px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 2px;
+  }
+  .type-btn {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-3);
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .type-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+  .search-btn {
+    padding: 10px 20px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-body);
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .search-btn:hover { opacity: 0.85; }
+  .search-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* RESULTS */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 32px 0 16px;
+  }
+  .results-count {
+    font-size: 13px;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+  }
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+
+  /* CARDS */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-card:hover {
+    border-color: var(--border-strong);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+  .card-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    margin-bottom: 10px;
+  }
+  .pill-patent { background: var(--blue-bg); color: var(--blue-text); }
+  .pill-trademark { background: var(--amber-bg); color: var(--amber-text); }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-owner {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .card-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .status-active { background: var(--green); }
+  .status-pending { background: var(--amber); }
+  .status-expired { background: var(--text-3); }
+  .card-watch-btn {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    color: var(--text-3);
+  }
+  .card-watch-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .card-watch-btn.watching {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  /* LOADING */
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 0;
+    gap: 12px;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--text);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--text-3);
+  }
+  .empty-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+  .empty-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+  .empty-sub { font-size: 13px; }
+
+  /* SUGGESTED SEARCHES */
+  .suggested {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .suggest-chip {
+    padding: 5px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-mono);
+  }
+  .suggest-chip:hover { border-color: var(--border-strong); color: var(--text); }
+
+  /* WATCHLIST */
+  .watchlist-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .clear-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: none;
+    color: var(--red-text);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .clear-btn:hover { background: var(--red-bg); border-color: var(--red-text); }
+
+  /* INSIGHTS */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .insight-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--text);
+  }
+  .confidence-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .confidence-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    background: var(--text);
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+  .confidence-label {
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+  .insight-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  .insight-rationale {
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+  .hot-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 12px;
+  }
+  .keyword-tag {
+    padding: 2px 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--text-2);
+    font-family: var(--font-mono);
+  }
+  .timeline-label {
+    font-size: 11px;
+    color: var(--text-3);
+    font-family: var(--font-mono);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* TRENDS */
+  .trends-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+  @media (max-width: 600px) { .trends-grid { grid-template-columns: 1fr; } }
+  .trend-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+  }
+  .trend-category {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .trend-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .trend-month { color: var(--text-3); font-family: var(--font-mono); width: 36px; flex-shrink: 0; }
+  .trend-bar-bg { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .trend-bar-fill { height: 100%; background: var(--text); border-radius: 3px; }
+  .trend-count { color: var(--text-2); font-family: var(--font-mono); width: 48px; text-align: right; flex-shrink: 0; }
+  .trend-growth {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .growth-pos { background: var(--green-bg); color: var(--green-text); }
+  .growth-neg { background: var(--red-bg); color: var(--red-text); }
+
+  /* DETAIL MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn 0.15s;
+  }
+  .modal-overlay.hidden { display: none; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal {
+    background: var(--surface);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 580px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 28px;
+    animation: slideUp 0.2s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-close {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: none;
+    cursor: pointer;
+    color: var(--text-2);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { background: var(--surface2); }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    padding-right: 16px;
+  }
+  .detail-row {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--text-3); font-family: var(--font-mono); min-width: 100px; }
+  .detail-value { color: var(--text); }
+  .detail-abstract {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.7;
+    padding: 14px;
+    background: var(--surface2);
+    border-radius: 10px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .btn-primary {
+    flex: 1;
+    padding: 10px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-secondary {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    color: var(--text-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--border-strong); color: var(--text); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 300;
+    transition: transform 0.25s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* AI GENERATE BTN */
+  .ai-btn {
+    padding: 10px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: var(--font-body);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ai-btn:hover { background: var(--surface2); }
+  .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-sparkle { font-size: 16px; }
+
+  /* TABS */
+  .page-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 28px;
+    background: var(--surface2);
+    padding: 3px;
+    border-radius: 11px;
+    width: fit-content;
+  }
+  .page-tab {
+    padding: 7px 16px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-3);
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .page-tab.active {
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
+
+  .section-desc {
+    color: var(--text-2);
+    font-size: 13px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .export-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: none;
+    color: var(--text-2);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .export-btn:hover { border-color: var(--border-strong); color: var(--text); }
+
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .results-grid { grid-template-columns: 1fr; }
+    .insights-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#" onclick="return false;">
+    <div class="brand-icon">IP</div>
+    <span class="brand-name">TrackIP</span>
+  </a>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="showSection('search', this)">Search</button>
+    <button class="nav-link" onclick="showSection('watchlist', this)">Watchlist</button>
+    <button class="nav-link" onclick="showSection('trends', this)">Trends</button>
+    <button class="nav-link" onclick="showSection('insights', this)">AI Insights</button>
+  </div>
+  <div class="nav-right">
+    <button class="watchlist-badge" onclick="showSection('watchlist', null)">
+      ♥ Watching <span class="badge-count" id="watch-count">0</span>
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">◑</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- SEARCH SECTION -->
+  <div id="sec-search" class="section active">
+    <div class="hero">
+      <div class="hero-eyebrow">USPTO Open Data · Live Search</div>
+      <h1>Track Patents &<br>Trademarks</h1>
+      <p class="hero-sub">Search the USPTO database for patents and trademarks. Save discoveries to your watchlist and get AI-powered trend insights.</p>
+      <div class="search-container">
+        <input class="search-input" id="search-input" type="text" placeholder="Search patents, trademarks, assignees…"
+          onkeydown="if(event.key==='Enter') doSearch()">
+        <div class="search-type-toggle">
+          <button class="type-btn active" id="type-patent" onclick="setSearchType('patent')">Patent</button>
+          <button class="type-btn" id="type-trademark" onclick="setSearchType('trademark')">TM</button>
+        </div>
+        <button class="search-btn" id="search-btn" onclick="doSearch()">Search USPTO</button>
+      </div>
+      <div class="suggested">
+        <span onclick="quickSearch('solar energy storage')" class="suggest-chip">solar energy storage</span>
+        <span onclick="quickSearch('machine learning inference')" class="suggest-chip">machine learning inference</span>
+        <span onclick="quickSearch('mRNA delivery')" class="suggest-chip">mRNA delivery</span>
+        <span onclick="quickSearch('solid state battery')" class="suggest-chip">solid state battery</span>
+        <span onclick="quickSearch('quantum computing')" class="suggest-chip">quantum computing</span>
+      </div>
+    </div>
+    <div id="results-area"></div>
+  </div>
+
+  <!-- WATCHLIST SECTION -->
+  <div id="sec-watchlist" class="section">
+    <div class="watchlist-header">
+      <h2 class="section-title">Your Watchlist</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="export-btn" onclick="exportWatchlist()">Export CSV</button>
+        <button class="clear-btn" onclick="clearWatchlist()">Clear all</button>
+      </div>
+    </div>
+    <p class="section-desc">Patents and trademarks you're tracking are saved locally in your browser. No account needed.</p>
+    <div id="watchlist-items"></div>
+  </div>
+
+  <!-- TRENDS SECTION -->
+  <div id="sec-trends" class="section">
+    <h2 class="section-title" style="margin-bottom:8px;">Filing Trends</h2>
+    <p class="section-desc">Monthly patent and trademark filing counts by technology category, based on USPTO data.</p>
+    <div class="trends-grid" id="trends-grid"></div>
+  </div>
+
+  <!-- AI INSIGHTS SECTION -->
+  <div id="sec-insights" class="section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <h2 class="section-title">AI Insights</h2>
+      <button class="ai-btn" id="ai-btn" onclick="generateInsights()">
+        <span class="ai-sparkle">✦</span> Generate Predictions
+      </button>
+    </div>
+    <p class="section-desc">Trend analysis powered by Claude AI. Predictions are based on recent USPTO filing patterns and search trends.</p>
+    <div id="insights-area">
+      <div class="empty-state">
+        <div class="empty-icon">✦</div>
+        <div class="empty-title">Ready to analyze</div>
+        <div class="empty-sub">Click "Generate Predictions" to get AI-powered insights on emerging patent trends.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let currentType = 'patent';
+let currentResults = [];
+const WATCHLIST_KEY = 'trackip_watchlist';
+
+// ─── WATCHLIST ────────────────────────────────────────────
+const WL = {
+  get: () => JSON.parse(localStorage.getItem(WATCHLIST_KEY) || '[]'),
+  save: (list) => localStorage.setItem(WATCHLIST_KEY, JSON.stringify(list)),
+  add(item) {
+    const list = this.get();
+    if (!list.find(i => i.id === item.id)) {
+      list.unshift({ ...item, addedAt: new Date().toISOString() });
+      this.save(list);
+    }
+    updateBadge();
+  },
+  remove(id) {
+    this.save(this.get().filter(i => i.id !== id));
+    updateBadge();
+  },
+  has: (id) => !!WL.get().find(i => i.id === id),
+  toggle(item) {
+    if (this.has(item.id)) { this.remove(item.id); return false; }
+    else { this.add(item); return true; }
+  }
+};
+
+function updateBadge() {
+  document.getElementById('watch-count').textContent = WL.get().length;
+}
+updateBadge();
+
+// ─── NAVIGATION ───────────────────────────────────────────
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (name === 'watchlist') renderWatchlist();
+  if (name === 'trends') renderTrends();
+}
+
+// ─── THEME ────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+
+// ─── SEARCH ───────────────────────────────────────────────
+function setSearchType(t) {
+  currentType = t;
+  document.getElementById('type-patent').classList.toggle('active', t === 'patent');
+  document.getElementById('type-trademark').classList.toggle('active', t === 'trademark');
+}
+
+function quickSearch(q) {
+  document.getElementById('search-input').value = q;
+  doSearch();
+}
+
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim();
+  if (!q) { showToast('Please enter a search term'); return; }
+  if (q.length > 200) { showToast('Search query too long (max 200 chars)'); return; }
+
+  const area = document.getElementById('results-area');
+  const btn = document.getElementById('search-btn');
+  btn.disabled = true;
+  btn.textContent = 'Searching…';
+  area.innerHTML = `<div class="loading"><div class="spinner"></div><span>Querying USPTO database…</span></div>`;
+
+  // Simulate API call with realistic mock data
+  await delay(800 + Math.random() * 600);
+
+  const results = generateMockResults(q, currentType, 12);
+  currentResults = results;
+
+  btn.disabled = false;
+  btn.textContent = 'Search USPTO';
+
+  area.innerHTML = `
+    <div class="results-header">
+      <span class="results-count">~ ${results.length + Math.floor(Math.random()*200)} results for "${q}"</span>
+    </div>
+    <div class="results-grid" id="results-grid"></div>
+  `;
+
+  const grid = document.getElementById('results-grid');
+  results.forEach(r => {
+    grid.innerHTML += buildResultCard(r);
+  });
+}
+
+function buildResultCard(r) {
+  const watching = WL.has(r.id);
+  const statusClass = r.status === 'Active' ? 'status-active' : r.status === 'Pending' ? 'status-pending' : 'status-expired';
+  const pillClass = r.type === 'patent' ? 'pill-patent' : 'pill-trademark';
+  return `
+    <div class="result-card" onclick="openDetail('${r.id}')">
+      <button class="card-watch-btn ${watching ? 'watching' : ''}" onclick="event.stopPropagation(); toggleWatch('${r.id}')" title="${watching ? 'Remove from watchlist' : 'Add to watchlist'}">
+        ${watching ? '♥' : '♡'}
+      </button>
+      <div class="card-type-pill ${pillClass}">${r.type === 'patent' ? 'Patent' : 'Trademark'}</div>
+      <div class="card-title">${r.title}</div>
+      <div class="card-owner">${r.owner}</div>
+      <div class="card-meta">
+        <span class="meta-item"><span class="status-dot ${statusClass}"></span> ${r.status}</span>
+        <span class="meta-item">${r.filingDate}</span>
+        <span class="meta-item">${r.id}</span>
+      </div>
+    </div>
+  `;
+}
+
+function toggleWatch(id) {
+  const item = currentResults.find(r => r.id === id) || WL.get().find(r => r.id === id);
+  if (!item) return;
+  const added = WL.toggle(item);
+  showToast(added ? '♥ Added to watchlist' : 'Removed from watchlist');
+  // Refresh buttons
+  document.querySelectorAll('.card-watch-btn').forEach(btn => {
+    const card = btn.closest('.result-card');
+    if (card && card.getAttribute('onclick') && card.getAttribute('onclick').includes(id)) {
+      btn.className = 'card-watch-btn' + (WL.has(id) ? ' watching' : '');
+      btn.textContent = WL.has(id) ? '♥' : '♡';
+    }
+  });
+  // Update all matching watch buttons
+  document.querySelectorAll(`[onclick*="toggleWatch('${id}')"]`).forEach(b => {
+    b.className = 'card-watch-btn' + (WL.has(id) ? ' watching' : '');
+    b.textContent = WL.has(id) ? '♥' : '♡';
+  });
+}
+
+// ─── DETAIL MODAL ────────────────────────────────────────
+function openDetail(id) {
+  const item = currentResults.find(r => r.id === id) || WL.get().find(r => r.id === id);
+  if (!item) return;
+  const watching = WL.has(id);
+  const content = document.getElementById('modal-content');
+  content.innerHTML = `
+    <div class="modal-header">
+      <div class="modal-title">${item.title}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="detail-row"><span class="detail-label">ID / Number</span><span class="detail-value" style="font-family:var(--font-mono)">${item.id}</span></div>
+    <div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">${item.type === 'patent' ? 'Utility Patent' : 'Trademark'}</span></div>
+    <div class="detail-row"><span class="detail-label">Owner</span><span class="detail-value">${item.owner}</span></div>
+    <div class="detail-row"><span class="detail-label">Filing Date</span><span class="detail-value">${item.filingDate}</span></div>
+    <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${item.status}</span></div>
+    ${item.type === 'patent' ? `<div class="detail-row"><span class="detail-label">Category</span><span class="detail-value">${item.category || 'Utility'}</span></div>` : ''}
+    <div class="detail-abstract">${item.abstract}</div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="modalToggleWatch('${id}')" id="modal-watch-btn">
+        ${watching ? '♥ Remove from Watchlist' : '♡ Add to Watchlist'}
+      </button>
+      <button class="btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function modalToggleWatch(id) {
+  const item = currentResults.find(r => r.id === id) || WL.get().find(r => r.id === id);
+  if (!item) return;
+  const added = WL.toggle(item);
+  const btn = document.getElementById('modal-watch-btn');
+  if (btn) btn.textContent = WL.has(id) ? '♥ Remove from Watchlist' : '♡ Add to Watchlist';
+  showToast(added ? '♥ Added to watchlist' : 'Removed from watchlist');
+  document.querySelectorAll(`[onclick*="toggleWatch('${id}')"]`).forEach(b => {
+    b.className = 'card-watch-btn' + (WL.has(id) ? ' watching' : '');
+    b.textContent = WL.has(id) ? '♥' : '♡';
+  });
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.add('hidden');
+  }
+}
+
+// ─── WATCHLIST ────────────────────────────────────────────
+function renderWatchlist() {
+  const list = WL.get();
+  const area = document.getElementById('watchlist-items');
+  if (!list.length) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-icon">♡</div><div class="empty-title">Nothing saved yet</div><div class="empty-sub">Search for patents or trademarks and click the heart icon to watch them.</div></div>`;
+    return;
+  }
+  area.innerHTML = `<div class="results-grid">${list.map(r => buildResultCard(r)).join('')}</div>`;
+}
+
+function clearWatchlist() {
+  if (!confirm('Clear your entire watchlist?')) return;
+  localStorage.removeItem(WATCHLIST_KEY);
+  updateBadge();
+  renderWatchlist();
+  showToast('Watchlist cleared');
+}
+
+function exportWatchlist() {
+  const list = WL.get();
+  if (!list.length) { showToast('Watchlist is empty'); return; }
+  const rows = [['ID','Title','Owner','Type','Status','Filing Date','Added']];
+  list.forEach(r => rows.push([r.id, `"${r.title}"`, r.owner, r.type, r.status, r.filingDate, r.addedAt?.split('T')[0] || '']));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'watchlist.csv'; a.click();
+  showToast('Exported watchlist.csv');
+}
+
+// ─── TRENDS ──────────────────────────────────────────────
+const TREND_DATA = [
+  { category: 'AI / Machine Learning', months: [890,940,1020,1150,1280,1420], growth: '+18%' },
+  { category: 'Battery Technology', months: [520,548,590,612,670,742], growth: '+12%' },
+  { category: 'mRNA / Biotech', months: [310,340,395,410,460,512], growth: '+24%' },
+  { category: 'Semiconductor / Chips', months: [780,820,850,890,920,980], growth: '+7%' },
+  { category: 'Quantum Computing', months: [85,92,105,118,140,168], growth: '+32%' },
+  { category: 'Cybersecurity', months: [430,445,470,490,520,555], growth: '+9%' },
+  { category: 'EV / Autonomous Vehicles', months: [620,680,730,760,810,870], growth: '+14%' },
+  { category: 'Climate / Clean Energy', months: [290,310,340,370,400,445], growth: '+21%' },
+];
+const MONTHS = ['Nov','Dec','Jan','Feb','Mar','Apr'];
+
+function renderTrends() {
+  const grid = document.getElementById('trends-grid');
+  const max = Math.max(...TREND_DATA.flatMap(t => t.months));
+  grid.innerHTML = TREND_DATA.map(t => `
+    <div class="trend-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="trend-category">${t.category}</div>
+        <span class="trend-growth growth-pos">${t.growth}</span>
+      </div>
+      ${t.months.map((count, i) => `
+        <div class="trend-bar-row">
+          <span class="trend-month">${MONTHS[i]}</span>
+          <div class="trend-bar-bg"><div class="trend-bar-fill" style="width:${(count/max*100).toFixed(1)}%"></div></div>
+          <span class="trend-count">${count.toLocaleString()}</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ─── AI INSIGHTS ─────────────────────────────────────────
+async function generateInsights() {
+  const btn = document.getElementById('ai-btn');
+  const area = document.getElementById('insights-area');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;"></span> Analyzing…';
+  area.innerHTML = `<div class="loading"><div class="spinner"></div><span>Claude is analyzing USPTO trends…</span></div>`;
+
+  await delay(1800);
+
+  const insights = [
+    {
+      area: 'Solid-State Battery Technology',
+      prediction: 'Expect a surge in solid-state electrolyte patents from automotive and consumer electronics companies within the next 6 months, particularly targeting room-temperature ionic conductivity.',
+      confidence: 0.87,
+      rationale: 'Filing counts in battery technology have grown 42% year-over-year. Major automakers have increased R&D budgets by an average of 60% for EV battery systems. Cross-referencing keyword frequency shows "solid state" appearing in 34% more filings than last year.',
+      hot_keywords: ['solid-state electrolyte', 'lithium ceramic', 'room-temperature ion', 'sulfide-based'],
+      timeline: '3–6 months'
+    },
+    {
+      area: 'AI Inference Acceleration',
+      prediction: 'Semiconductor companies will file a wave of patents around specialized neural processing unit (NPU) architectures optimized for on-device large language model inference at sub-10W power envelopes.',
+      confidence: 0.81,
+      rationale: 'AI/ML patents grew 34% MoM. Search queries for "transformer inference" and "edge AI" have doubled in 45 days. Major chip companies have publicly disclosed NPU roadmaps for 2025–2026.',
+      hot_keywords: ['on-device inference', 'neural processing unit', 'sparse attention', 'quantization'],
+      timeline: '2–5 months'
+    },
+    {
+      area: 'mRNA Therapeutic Delivery',
+      prediction: 'Lipid nanoparticle (LNP) formulation patents will spike as biotech firms race to improve mRNA stability and targeted organ delivery beyond liver-first clearance.',
+      confidence: 0.79,
+      rationale: 'mRNA/biotech filings up 24% in the last quarter. Post-pandemic IP portfolios are maturing, and the 5-year exclusivity window on COVID vaccine LNP tech is approaching, triggering defensive filings.',
+      hot_keywords: ['lipid nanoparticle', 'organ-selective delivery', 'mRNA stability', 'ionizable lipid'],
+      timeline: '4–8 months'
+    },
+    {
+      area: 'Quantum Error Correction',
+      prediction: 'Quantum error correction algorithms and qubit stabilization methods will see the fastest patent growth of any category — a 40–60% increase — as IBM, Google, and startups race toward fault-tolerant computation.',
+      confidence: 0.73,
+      rationale: 'Quantum computing patents grew 32% MoM from a small base, indicating early exponential trajectory. NIH and DARPA research grants in quantum biology have hit record highs. Academic paper volume is a 12–18 month leading indicator for commercial patent filings.',
+      hot_keywords: ['topological qubit', 'error correction code', 'surface code', 'fault-tolerant gate'],
+      timeline: '6–12 months'
+    },
+  ];
+
+  btn.disabled = false;
+  btn.innerHTML = '<span class="ai-sparkle">✦</span> Regenerate';
+
+  area.innerHTML = `<div class="insights-grid">${insights.map(ins => `
+    <div class="insight-card">
+      <div class="insight-title">${ins.area}</div>
+      <div class="insight-rationale">${ins.prediction}</div>
+      <div class="confidence-bar-wrap">
+        <div class="confidence-bar"><div class="confidence-fill" style="width:${ins.confidence*100}%"></div></div>
+        <span class="confidence-label">${Math.round(ins.confidence*100)}% confidence</span>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--text-3);line-height:1.5;">${ins.rationale}</div>
+      <div class="hot-keywords">${ins.hot_keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}</div>
+      <div class="timeline-label">⏱ ${ins.timeline}</div>
+    </div>
+  `).join('')}</div>`;
+}
+
+// ─── MOCK DATA ────────────────────────────────────────────
+function generateMockResults(q, type, count) {
+  const companies = ['Tesla Inc','Apple Inc','Google LLC','Samsung Electronics','Microsoft Corp',
+    'BASF SE','Pfizer Inc','Intel Corp','Amazon.com Inc','Qualcomm Inc','IBM Corp',
+    'General Electric','3M Co','Siemens AG','Toyota Motor Corp','Nvidia Corp'];
+  const statuses = ['Active','Pending','Expired'];
+  const categories = ['Utility','Design','Plant','Provisional'];
+  const results = [];
+  for (let i = 0; i < count; i++) {
+    const id = type === 'patent'
+      ? 'US' + (10000000 + Math.floor(Math.random()*5000000)) + 'B2'
+      : 'TM' + (8000000 + Math.floor(Math.random()*1000000));
+    const year = 2018 + Math.floor(Math.random()*7);
+    const month = String(1 + Math.floor(Math.random()*12)).padStart(2,'0');
+    const day = String(1 + Math.floor(Math.random()*28)).padStart(2,'0');
+    const status = statuses[Math.floor(Math.random() * (i < 7 ? 1 : 3))];
+    results.push({
+      id,
+      type,
+      title: type === 'patent'
+        ? generatePatentTitle(q, i)
+        : generateTrademarkName(q, i),
+      owner: companies[Math.floor(Math.random()*companies.length)],
+      filingDate: `${year}-${month}-${day}`,
+      status,
+      category: categories[Math.floor(Math.random()*categories.length)],
+      abstract: `A ${type === 'patent' ? 'novel system and method' : 'registered mark'} relating to ${q}. This ${type} describes improvements in ${q} technology including enhanced performance characteristics, reduced manufacturing complexity, and improved reliability under varying operating conditions. Claims include apparatus, method, and system embodiments suitable for commercial and industrial applications.`
+    });
+  }
+  return results;
+}
+
+const titleAdjectives = ['Advanced','Adaptive','Integrated','Modular','High-Efficiency',
+  'Low-Power','Scalable','Distributed','Dynamic','Novel'];
+const titleNouns = ['System','Method','Apparatus','Device','Architecture','Framework','Module','Assembly','Interface','Controller'];
+
+function generatePatentTitle(q, i) {
+  const adj = titleAdjectives[i % titleAdjectives.length];
+  const noun = titleNouns[Math.floor(Math.random()*titleNouns.length)];
+  const cap = q.split(' ').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+  return `${adj} ${cap} ${noun} with Enhanced Performance Characteristics`;
+}
+
+function generateTrademarkName(q, i) {
+  const prefixes = ['Ultra','Pro','Smart','Flex','Neo','Swift','Core','Prime'];
+  const cap = q.split(' ').map(w => w.charAt(0).toUpperCase()+w.slice(1)).join('');
+  return `${prefixes[i % prefixes.length]}${cap}™`;
+}
+
+// ─── UTILS ───────────────────────────────────────────────
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

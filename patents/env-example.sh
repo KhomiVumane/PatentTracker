@@ -1,0 +1,12 @@
+# Copy this file to .env and fill in your values
+PORT=3001
+
+# MySQL
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=Underpaid@2021
+DB_NAME=trackip
+
+# CORS — set to your frontend origin in production
+CORS_ORIGIN=http://localhost:5500
